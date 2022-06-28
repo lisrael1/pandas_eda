@@ -58,6 +58,7 @@ class ExploreTable:
     def _initialize_statistics(self):
         self.statistics = self.df.columns.to_series().to_frame('column_name')
         self.statistics['rows'] = self.number_of_rows
+        self.statistics['uniques'] = self.df.nunique()
 
     def get_table_statistics(self):
         return self.statistics.copy()
@@ -65,13 +66,13 @@ class ExploreTable:
     def get_columns_statistics(self):
         stats = self.get_table_statistics().set_index('column_name')
         stats = stats.join(self.bars)
-        stats = stats.sort_values('entropy_inx')
+        stats = stats.sort_values('diversity')
         return stats
 
     def get_frequent_values_wide(self):
         stats = self.bars.copy()
         stats = stats.join(self.frequent_values.filter(regex='bar|val'))
-        stats = stats.sort_values('entropy_inx')
+        stats = stats.sort_values('diversity')
         return stats
 
     def get_frequent_values_long(self):
@@ -99,14 +100,16 @@ class ExploreTable:
         :return:
         """
         if self.number_of_rows is None:
-            self.statistics['diversity'] = None
+            self.statistics['diversity_inx'] = None
             return
-        df = self.df.assign(max_entropy=range(self.df.shape[0]))
+        df = self.df.copy()
         try:
-            df = df.astype(str).apply(entropy).sort_values(ascending=False)
+            columns_entropy = df.astype(str).apply(entropy).sort_values(ascending=False)
         except (AttributeError, TypeError):
-            df = df.select_dtypes(object).astype(str).apply(entropy).sort_values(ascending=False)
-        self.statistics['diversity'] = (2**df).div(self.number_of_rows / 100).round(0).astype(int)
+            columns_entropy = df.select_dtypes(object).astype(str).apply(entropy).sort_values(ascending=False)
+        # entropy at base 2. when having 200 unique values out of 200 rows, then 2**entropy will give us 200
+        # this is better than taking unique/rows as unique can be unbalances. value_counts give more information
+        self.statistics['diversity_inx'] = (2**columns_entropy).div(self.number_of_rows / 100).round(0).astype(int)
 
     def _calc_columns_average_len(self):
         """
@@ -139,7 +142,6 @@ class ExploreTable:
 
         # adding columns that contains all data - value, frequency and bar
         values['all_data'] = values.val.astype(str) + ':' + values.freq.astype(str) + '%:' + values.bar
-        # values['all_data'] = values.astype(str).apply(':'.join, axis=1)
         values = values.stack()
         # converting multi index to combined single index
         values.index = values.index.to_frame().astype(str).iloc[:, ::-1].apply('_'.join, axis=1).values
@@ -152,10 +154,9 @@ class ExploreTable:
             values += [self._frequent_values_at_column(self.df[col], self.number_of_frequent_values).to_frame(col)]
         self.frequent_values = pd.concat(values, axis=1).T
         self.frequent_values.index.name = 'col'
-        # self.statistics = self.statistics.merge(values, left_on='column_name', right_index=True)
 
     def _add_bars(self):
         nans = self.statistics.nan_perc.fillna(0).apply(bar).rename('nans')
-        entropy_inx = self.statistics.diversity.apply(bar).rename('entropy_inx')
-        self.bars = pd.concat([nans, entropy_inx], axis=1)
+        diversity = self.statistics.diversity_inx.apply(bar).rename('diversity')
+        self.bars = pd.concat([nans, diversity], axis=1)
         self.bars.index.name = 'col'

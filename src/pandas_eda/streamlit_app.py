@@ -45,44 +45,55 @@ if 1:
     process = subprocess.Popen(sys.argv)
 
 """
-import io
-import os
 import sys
+from io import BytesIO
 import streamlit as st
 import pandas as pd
 import pandas_eda
 from streamlit import cli as stcli
 
 
+def download(df, excel_name):
+    st.write(df)
+
+    output = BytesIO()
+    df.to_excel(output, index=False, sheet_name='Sheet1')
+    st.download_button(label=f'📥 Download {excel_name}',
+                       data=output.getvalue(), file_name=f'{excel_name}.xlsx')
+
+
 def main():
     st.set_page_config(layout="wide")
 
-    if sys.argv[1].endswith('.xlsx'):
-        df = pd.read_excel(sys.argv[1], index_col=None)
-    elif sys.argv[1].endswith('.csv'):
-        df = pd.read_csv(sys.argv[1], index_col=None)
-    # os.remove(sys.argv[1])
-    # else:
-    #     try:
-    #         df = pd.read_excel(sys.argv[1], index_col=None)
-    #     except:
-    #         df = pd.read_csv(io.StringIO(sys.argv[1]), index_col=None, sep=r'\s+')
+    st.header('explore table')
+    with st.expander('help'):
+        st.code('examples for query at the side bar:\n\t60 > age > 32 and firstname.str.lower().str.startswith("a")')
+        st.code('tables:\n\tclick column name to sort by that column')
+    df = pd.read_excel(sys.argv[1], index_col=None)
 
-    query = st.sidebar.text_area('query')
+    query = st.sidebar.text_area('query by table content')
     if len(query):
         df = df.query(query)
 
     # EDA
     eda = pandas_eda.explore.ExploreTable(df)
-    st.info('data')
-    st.write(df)
-    st.info('columns statistics')
-    st.write(eda.get_columns_statistics())
+
+    with st.expander('data'):
+        download(df, 'data')
+
+    st.subheader('columns statistics:')
+    download(eda.get_columns_statistics().reset_index(), 'statistics')
+
+    st.sidebar.header('frequent values per column:')
     freq = eda.get_frequent_values_long().reset_index()
     for col in freq.col.unique():
         st.sidebar.info(col)
-        st.sidebar.write(freq.query('col==@col')[['nans', 'entropy_inx']].iloc[0].rename('bar'))
-        st.sidebar.write(freq.query('col==@col').set_index('val').bar)
+        col_stat = eda.get_columns_statistics()
+        col_stat = col_stat.loc[col, ['nans', 'diversity', 'uniques']]
+        col_stat.uniques = f'{col_stat.uniques}/{df.shape[0]}'
+        col_stat = col_stat.rename('index score').astype(str)
+        st.sidebar.write(col_stat)
+        st.sidebar.write(freq.query('col==@col').set_index('val').bar.rename('frequency').dropna())
 
 
 if __name__ == '__main__':

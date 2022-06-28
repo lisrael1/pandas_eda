@@ -21,7 +21,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     package_data={"": ["*.xlsx"]},
-    install_requires=[['tqdm', 'pandas', 'streamlit', 'numpy']],
+    install_requires=[['tqdm', 'pandas', 'streamlit', 'numpy', 'faker']],
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src", exclude=['*_tests', '*_examples'], ),
     python_requires=">=3.6",
