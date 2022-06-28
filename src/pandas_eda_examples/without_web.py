@@ -20,5 +20,8 @@ def generate_fake_table():
 
 
 df = generate_fake_table()
-df.eda()
-sleep(600)
+eda = pandas_eda.explore.ExploreTable(df)
+
+eda.get_frequent_values_long()
+eda.get_frequent_values_wide()
+eda.get_columns_statistics()

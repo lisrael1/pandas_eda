@@ -39,7 +39,7 @@ df.eda()  # yes, you can open multiple EDA windows!
 df = manipulation_3(df)
 df.eda()
 
-sleep(600)  # just that ending script will not end the eda
+sleep(600)  # just that ending script will end the eda too, so delaying the exit
 
 ```
 
