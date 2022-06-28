@@ -1,9 +1,10 @@
-import pandas_eda.streamlit_app
-import pandas_eda.explore
 import subprocess
 import tempfile
-import pandas as pd
 import atexit
+
+import pandas as pd
+import pandas_eda.streamlit_app
+import pandas_eda.explore
 
 
 def eda(df):
@@ -20,4 +21,4 @@ def eda_exit_handler(process):
     process.kill()
 
 
-pd.core.frame.DataFrame.eda = lambda df: eda(df)
+pd.core.frame.DataFrame.eda = lambda df: pandas_eda.eda(df)

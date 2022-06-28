@@ -46,11 +46,14 @@ if 1:
 
 """
 import sys
+import os
 from io import BytesIO
 import streamlit as st
 import pandas as pd
-import pandas_eda
 from streamlit import cli as stcli
+# from terminal, popen has different paths, so adding the package path manually
+sys.path.append(os.path.dirname(__file__)+'/../')
+import pandas_eda
 
 
 def download(df, excel_name):

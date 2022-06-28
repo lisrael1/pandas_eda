@@ -1,3 +1,5 @@
+from time import sleep
+
 import pandas as pd
 import numpy as np
 import pandas_eda
@@ -19,3 +21,4 @@ def generate_fake_table():
 
 df = generate_fake_table()
 df.eda()
+sleep(600)
