@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="pandas_eda",
-    version="0.5.1",
+    version="0.5.2",
     author="Lior Israeli",
     author_email="israelilior@gmail.com",
     description="streamlit app to display table and frequent values for each column",

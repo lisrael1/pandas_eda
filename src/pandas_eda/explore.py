@@ -110,9 +110,9 @@ class ExploreTable:
             return
         df = self.df.copy()
         try:
-            columns_entropy = df.astype(str).apply(lambda r: entropy(r.dropna()))
+            columns_entropy = df.apply(lambda r: entropy(r.dropna().astype(str)))
         except (AttributeError, TypeError):
-            columns_entropy = df.select_dtypes(object).astype(str).apply(lambda r: entropy(r.dropna()))
+            columns_entropy = df.select_dtypes(object).apply(lambda r: entropy(r.dropna().astype(str)))
         columns_entropy = columns_entropy.sort_values(ascending=False)
         # entropy at base 2. when having 200 unique values out of 200 rows, then 2**entropy will give us 200
         # this is better than taking unique/rows as unique can be unbalances. value_counts give more information
