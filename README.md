@@ -1,4 +1,4 @@
-## pandas_eda
+## pandas EDA
 
 Big Data? Machine Learning?
 
