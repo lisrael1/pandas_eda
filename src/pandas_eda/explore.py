@@ -41,24 +41,18 @@ class ExploreTable:
         self.max_rows = 1000
         self.number_of_frequent_values = 6
 
+        # original table
         self.df = df
+        # statistics summary. each df column will be a row here
         self.statistics = None
+        # each df column will have self.number_of_frequent_values rows here
         self.frequent_values = None
         self.bars = None
         self.number_of_rows = df.shape[0]
 
-        self._initialize_statistics()
+        self._statistics_table()
         self._frequent_values()
-        self._count_nans()
-        self._calc_columns_average_len()
-        self._calc_columns_diversity()
         self._add_bars()
-        self.statistics = self.statistics.reset_index(drop=True)
-
-    def _initialize_statistics(self):
-        self.statistics = self.df.columns.to_series().to_frame('column_name')
-        self.statistics['rows'] = self.number_of_rows
-        self.statistics['uniques'] = self.df.nunique()
 
     def get_table_statistics(self):
         return self.statistics.copy()
@@ -85,6 +79,18 @@ class ExploreTable:
         stats[['bar', 'val']].reset_index(drop=False)
         return stats
 
+    def _statistics_table(self):
+        self._initialize_statistics()
+        self._count_nans()
+        self._calc_columns_average_len()
+        self._calc_columns_diversity()
+        self.statistics = self.statistics.reset_index(drop=True)
+
+    def _initialize_statistics(self):
+        self.statistics = self.df.columns.to_series().to_frame('column_name')
+        self.statistics['rows'] = self.number_of_rows
+        self.statistics['uniques'] = self.df.nunique()
+
     def _count_nans(self):
         df = self.df.isna().mean().fillna(0)
         if self.number_of_rows is None:
@@ -104,9 +110,10 @@ class ExploreTable:
             return
         df = self.df.copy()
         try:
-            columns_entropy = df.astype(str).apply(entropy).sort_values(ascending=False)
+            columns_entropy = df.astype(str).apply(lambda r: entropy(r.dropna()))
         except (AttributeError, TypeError):
-            columns_entropy = df.select_dtypes(object).astype(str).apply(entropy).sort_values(ascending=False)
+            columns_entropy = df.select_dtypes(object).astype(str).apply(lambda r: entropy(r.dropna()))
+        columns_entropy = columns_entropy.sort_values(ascending=False)
         # entropy at base 2. when having 200 unique values out of 200 rows, then 2**entropy will give us 200
         # this is better than taking unique/rows as unique can be unbalances. value_counts give more information
         self.statistics['diversity_inx'] = (2**columns_entropy).div(self.number_of_rows / 100).round(0).astype(int)
@@ -158,5 +165,6 @@ class ExploreTable:
     def _add_bars(self):
         nans = self.statistics.nan_perc.fillna(0).apply(bar).rename('nans')
         diversity = self.statistics.diversity_inx.apply(bar).rename('diversity')
-        self.bars = pd.concat([nans, diversity], axis=1)
+        self.bars = pd.concat([nans, diversity, self.statistics.column_name], axis=1)
+        self.bars = self.bars.set_index('column_name')
         self.bars.index.name = 'col'

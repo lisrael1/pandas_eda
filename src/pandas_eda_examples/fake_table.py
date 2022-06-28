@@ -20,5 +20,6 @@ def generate_fake_table():
 
 
 df = generate_fake_table()
+# pandas_eda.explore.ExploreTable(df)
 df.eda()
 sleep(600)
