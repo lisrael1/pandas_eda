@@ -2,26 +2,26 @@
 
 Big Data? Machine Learning?
 
-You work with your data -<br>
+You work with your data -  
 Manipulating it, merging, pivot and more.
 
-But what happened in between? Did you get a lot of nans? Maybe duplicated values?<br>
-You constantly need to check your data status, <br>
+But what happened in between? Did you get a lot of nans? Maybe duplicated values?  
+You constantly need to check your data status,  
 But you cannot do values_counts, isna and all those stuffs every second...
 
-pandas_eda will show you status and frequent values for each column!<br>
+pandas_eda will show you status and frequent values for each column!  
 You will be focused on what you have on the spot.
 
-Demo is the best way to understand:<br>
-[![demo](https://github.com/lisrael1/pandas_eda/blob/master/front.jpg)](https://youtu.be/kHT6MshXb04)
+**Demo** is the best way to understand:  
+[![demo](https://github.com/lisrael1/pandas_eda/blob/master/front.jpg?raw=True)](https://youtu.be/kHT6MshXb04)
 
-install:
+**install:**
 
 ```shell
 pip install pandas_eda
 ```
 
-usage:
+**usage:**
 ```python
 import pandas as pd
 import pandas_eda
@@ -43,6 +43,13 @@ sleep(600)  # just that ending script will end the eda too, so delaying the exit
 
 ```
 
-note:
+**note:**  
+If you're running on remote machine, the eda will be opened on the remote...
 
-if you're running on remote machine, the eda will be opened on the remote...
+**alternatives:**  
+After starting this tool I've found 2 cool alternatives:
+* [sweetviz](https://pypi.org/project/sweetviz)
+    <ul>Has a nice interactive report</ul>
+* [mito](https://www.trymito.io/) 
+    <ul>Greate for new table that needs also cleaning.<br>
+    Works only at jupyter</ul> 
