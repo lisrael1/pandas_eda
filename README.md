@@ -9,7 +9,7 @@ But what happened in between? Did you get a lot of nans? Maybe duplicated values
 You constantly need to check your data status,  
 But you cannot do values_counts, isna and all those stuffs every second...
 
-pandas_eda will show you status and frequent values for each column!  
+pandas_eda is an Exploratory Data Analysis tool that will show you status and frequent values for each column!  
 You will be focused on what you have on the spot.
 
 **Demo** is the best way to understand:  

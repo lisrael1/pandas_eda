@@ -8,7 +8,7 @@ setuptools.setup(
     version="0.6.2",
     author="Lior Israeli",
     author_email="israelilior@gmail.com",
-    description="streamlit app to display table and frequent values for each column",
+    description="Exploratory Data Analysis app to display table and frequent values for each column",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/lisrael1/pandas_eda",
