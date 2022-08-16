@@ -9,7 +9,7 @@ But what happened in between? Did you get a lot of nans? Maybe duplicated values
 You constantly need to check your data status,  
 But you cannot do values_counts, isna and all those stuffs every second...
 
-pandas_eda is an Exploratory Data Analysis tool that will show you status and frequent values for each column!  
+**pandas_eda** is an **Exploratory Data Analysis** tool that will show you status and frequent values for each column!  
 You will be focused on what you have on the spot.
 
 **Demo** is the best way to understand:  
@@ -49,7 +49,7 @@ If you're running on remote machine, the eda will be opened on the remote...
 **alternatives:**  
 After starting this tool I've found 2 cool alternatives:
 * [sweetviz](https://pypi.org/project/sweetviz)
-    <ul>Has a nice interactive report</ul>
+    <ul>Has a nice interactive report.</ul>
 * [mito](https://www.trymito.io/) 
     <ul>Greate for new table that needs also cleaning.<br>
-    Works only at jupyter</ul> 
+    Works only at jupyter.</ul> 
