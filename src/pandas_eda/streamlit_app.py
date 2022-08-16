@@ -47,10 +47,10 @@ if 1:
 """
 import sys
 import os
+import subprocess
 from io import BytesIO
 import streamlit as st
 import pandas as pd
-from streamlit import cli as stcli
 # from terminal, popen has different paths, so adding the package path manually
 sys.path.append(os.path.dirname(__file__)+'/../')
 import pandas_eda
@@ -100,9 +100,9 @@ def main():
 
 
 if __name__ == '__main__':
-    # this code cannot really work as we dont have sys.argv[1] that contains the table to show...
     if st._is_running_with_streamlit:
+        # this code cannot really work as we dont have sys.argv[1] that contains the table to show...
         main()
     else:
-        sys.argv = ["streamlit", "run", sys.argv[0]]
-        sys.exit(stcli.main())
+        argv = ["streamlit", "run", sys.argv[0]]
+        subprocess.run([f"{sys.executable}", "-m"]+argv)
