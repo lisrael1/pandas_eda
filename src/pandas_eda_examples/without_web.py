@@ -1,9 +1,13 @@
-from time import sleep
-
 import pandas as pd
 import numpy as np
 import pandas_eda
 from faker import Faker
+
+pd.options.display.expand_frame_repr = False
+pd.options.display.max_colwidth = 40
+pd.options.display.max_columns = 0
+pd.options.display.max_rows = 100
+pd.options.display.min_rows = 20
 
 
 def generate_fake_table():
@@ -22,6 +26,9 @@ def generate_fake_table():
 df = generate_fake_table()
 eda = pandas_eda.explore.ExploreTable(df)
 
-eda.get_frequent_values_long()
-eda.get_frequent_values_wide()
-eda.get_columns_statistics()
+print('\n\n *** column statistics *** ')
+print(eda.get_columns_statistics())
+print('\n\n *** frequent values, long format *** ')
+print(eda.get_frequent_values_long())
+print('\n\n *** frequent values, wide format *** ')
+print(eda.get_frequent_values_wide())

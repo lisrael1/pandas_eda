@@ -47,9 +47,21 @@ df.loc[df.B==1, 'A'] -= 30
 df.eda()
 
 
+# no need at jupyter or debug mode...
 # just that ending script will end the eda too, so delaying the exit. 
-# no need at jupyter
 sleep(600)  
+```
+
+**cli mode**
+```python
+eda = pandas_eda.explore.ExploreTable(df)
+
+print('\n\n *** column statistics *** ')
+print(eda.get_columns_statistics())
+print('\n\n *** frequent values, long format *** ')
+print(eda.get_frequent_values_long())
+print('\n\n *** frequent values, wide format *** ')
+print(eda.get_frequent_values_wide())
 ```
 
 **note:**  
