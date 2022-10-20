@@ -89,15 +89,13 @@ def main():
         download(eda.get_columns_statistics().reset_index(), 'statistics')
 
     st.sidebar.header('frequent values per column:')
-    freq = eda.get_frequent_values_long().reset_index()
+    freq = eda.get_frequent_values()
     for col in freq.col.unique():
         st.sidebar.info(col)
-        col_stat = eda.get_columns_statistics()
-        col_stat = col_stat.loc[col, ['nans', 'diversity', 'uniques']]
-        col_stat.uniques = f'{col_stat.uniques}/{df.shape[0]}'
-        col_stat = col_stat.rename('index score').astype(str)
-        st.sidebar.write(col_stat)
-        st.sidebar.write(freq.query('col==@col').set_index('val').bar.rename('frequency').dropna())
+        show = freq.query(f'col=="{col}"').set_index('value').bar
+        show.name = 'percentages'
+        show.index = show.index.astype(str)
+        st.sidebar.write(show)
 
 
 if __name__ == '__main__':

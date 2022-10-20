@@ -64,10 +64,8 @@ eda = pandas_eda.explore.ExploreTable(df)
 
 print('\n\n *** column statistics *** ')
 print(eda.get_columns_statistics())
-print('\n\n *** frequent values, long format *** ')
-print(eda.get_frequent_values_long())
-print('\n\n *** frequent values, wide format *** ')
-print(eda.get_frequent_values_wide())
+print('\n\n *** frequent values *** ')
+print(eda.get_frequent_values())
 ```
 
 **note:**  
