@@ -30,21 +30,26 @@ from time import sleep
 
 # dummy data
 df = pd._testing.makeMixedDataFrame()
-# or your data...
-# df = pd.read_excel('whatever.xlsx')
+# or load your data with pd.read_excel('whatever.xlsx')
 
-# show original data
+
+# show original data. will pop up a web application
 df.eda()  # can use this at debug mode too!
+
 
 # manipulation #1
 df.A += 10
 df.eda()  # yes, you can open multiple EDA windows!
 
+
 # manipulation #2
 df.loc[df.B==1, 'A'] -= 30
 df.eda()
 
-sleep(600)  # just that ending script will end the eda too, so delaying the exit. no need at jupyter
+
+# just that ending script will end the eda too, so delaying the exit. 
+# no need at jupyter
+sleep(600)  
 ```
 
 **note:**  
