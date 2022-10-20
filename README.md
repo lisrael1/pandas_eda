@@ -54,6 +54,12 @@ sleep(600)
 
 **cli mode**
 ```python
+# disabling the wrapping of a long table at the print...
+pd.options.display.expand_frame_repr = False
+pd.options.display.max_columns = 0
+pd.options.display.min_rows = 20
+
+
 eda = pandas_eda.explore.ExploreTable(df)
 
 print('\n\n *** column statistics *** ')
