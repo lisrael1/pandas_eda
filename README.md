@@ -28,19 +28,23 @@ import pandas_eda
 from time import sleep
 
 
-df = pd.read_excel('whatever.xlsx')
+# dummy data
+df = pd._testing.makeMixedDataFrame()
+# or your data...
+# df = pd.read_excel('whatever.xlsx')
 
-df = manipulation_1(df)
+# show original data
 df.eda()  # can use this at debug mode too!
 
-df = manipulation_2(df)
+# manipulation #1
+df.A += 10
 df.eda()  # yes, you can open multiple EDA windows!
 
-df = manipulation_3(df)
+# manipulation #2
+df.loc[df.B==1, 'A'] -= 30
 df.eda()
 
-sleep(600)  # just that ending script will end the eda too, so delaying the exit
-
+sleep(600)  # just that ending script will end the eda too, so delaying the exit. no need at jupyter
 ```
 
 **note:**  
@@ -51,5 +55,5 @@ After starting this tool I've found 2 cool alternatives:
 * [sweetviz](https://pypi.org/project/sweetviz)
     <ul>Has a nice interactive report.</ul>
 * [mito](https://www.trymito.io/) 
-    <ul>Greate for new table that needs also cleaning.<br>
+    <ul>Great for new table that needs also cleaning.<br>
     Works only at jupyter.</ul> 

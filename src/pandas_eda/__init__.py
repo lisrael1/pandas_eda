@@ -1,3 +1,4 @@
+import sys
 import subprocess
 import tempfile
 import atexit
@@ -8,9 +9,9 @@ import pandas_eda.explore
 
 
 def eda(df):
-    fp = tempfile.TemporaryFile(suffix='.xlsx', delete=False)
+    fp = tempfile.TemporaryFile(suffix='.xlsx', delete=False)  # TODO - delete file at exit
     df.to_excel(fp, index=None)
-    args = ["streamlit", "run", pandas_eda.streamlit_app.__file__,
+    args = [sys.executable, "-m", "streamlit", "run", pandas_eda.streamlit_app.__file__,
             "--", fp.name,
             ]
     process = subprocess.Popen(args)

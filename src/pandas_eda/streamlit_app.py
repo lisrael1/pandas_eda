@@ -67,11 +67,11 @@ def download(df, excel_name):
 
 def main():
     st.set_page_config(layout="wide")
+    tab_statistics, tab_data, tab_help = st.tabs(['statistics', 'data', 'help'])
 
-    st.header('explore table')
-    with st.expander('help'):
+    with tab_help:
         st.code('examples for query at the side bar:\n\t60 > age > 32 and firstname.str.lower().str.startswith("a")')
-        st.code('tables:\n\tclick column name to sort by that column')
+        st.code('tables:\n\tclick column name to sort table by that column')
     df = pd.read_excel(sys.argv[1], index_col=None)
 
     query = st.sidebar.text_area('query by table content')
@@ -81,11 +81,12 @@ def main():
     # EDA
     eda = pandas_eda.explore.ExploreTable(df)
 
-    with st.expander('data'):
+    with tab_data:
         download(df, 'data')
 
-    st.subheader('columns statistics:')
-    download(eda.get_columns_statistics().reset_index(), 'statistics')
+    with tab_statistics:
+        st.subheader('columns statistics:')
+        download(eda.get_columns_statistics().reset_index(), 'statistics')
 
     st.sidebar.header('frequent values per column:')
     freq = eda.get_frequent_values_long().reset_index()
