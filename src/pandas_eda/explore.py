@@ -115,7 +115,7 @@ class ExploreTable:
         frequents['percentages'] = frequents.counts.div(self._number_of_rows).mul(100).round().astype(int)
         frequents['bar'] = frequents.percentages.apply(bar)
 
-        self.frequent_values_per_column = frequents
+        self.frequent_values_per_column = frequents[['col', 'value', 'frequent_inx', 'counts', 'percentages', 'bar']]
 
     def get_columns_statistics(self):
         return self.statistics_of_columns.copy()
