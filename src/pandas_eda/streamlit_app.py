@@ -75,7 +75,7 @@ def download(df, output_name):
 
 def main():
     st.set_page_config(layout="wide")
-    tab_statistics, tab_data, tab_help = st.tabs(['statistics', 'data', 'help'])
+    tab_statistics, tab_frequent_values, tab_data, tab_help = st.tabs(['statistics', 'frequent values', 'data', 'help'])
 
     with tab_help:
         st.code('examples for query at the side bar:\n\t60 > age > 32 and firstname.str.lower().str.startswith("a")')
@@ -97,6 +97,12 @@ def main():
     with tab_statistics:
         st.subheader('columns statistics:')
         download(eda.get_columns_statistics().reset_index(), 'statistics')
+
+    with tab_frequent_values:
+        st.subheader('frequent values:')
+        frequent = eda.get_frequent_values()
+        frequent.value = frequent.value.astype(str)  # streamlit issue
+        download(frequent, 'frequent_values')
 
     st.sidebar.header('frequent values per column:')
     freq = eda.get_frequent_values()
