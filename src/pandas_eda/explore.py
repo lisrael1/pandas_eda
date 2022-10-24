@@ -60,7 +60,7 @@ class ExploreTable:
         self._most_frequent_statistics()
 
     def _value_counts(self):
-        for col in self.df.columns:
+        for col in tqdm(self.df.columns, desc='value count per column'):
             self._value_counts_per_column[col] = self.df[col].value_counts(dropna=False)
 
     def _calc_average_length(self, col):
@@ -84,7 +84,7 @@ class ExploreTable:
 
     def _columns_statistics(self):
         results = []
-        for col, values in self._value_counts_per_column.items():
+        for col, values in tqdm(self._value_counts_per_column.items(), desc='statistics per column'):
             statistics = dict()
             statistics['col'] = col
             statistics['uniques'] = values.shape[0]

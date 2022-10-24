@@ -56,13 +56,21 @@ sys.path.append(os.path.dirname(__file__)+'/../')
 import pandas_eda
 
 
-def download(df, excel_name):
+def download(df, output_name):
     st.write(df)
 
+    size_mb = df.memory_usage(deep=True).sum() / 1024 ** 2
     output = BytesIO()
-    df.to_excel(output, index=False, sheet_name='Sheet1')
-    st.download_button(label=f'📥 Download {excel_name}',
-                       data=output.getvalue(), file_name=f'{excel_name}.xlsx')
+    if size_mb < 10:
+        print('dumping into excel format')
+        df.to_excel(output, index=False, sheet_name='Sheet1')
+        st.download_button(label=f'📥 Download {output_name}',
+                           data=output.getvalue(), file_name=f'{output_name}.xlsx')
+    else:
+        print('dumping into csv format')
+        df.to_csv(output, index=False)
+        st.download_button(label=f'📥 Download {output_name}',
+                           data=output.getvalue(), file_name=f'{output_name}.csv')
 
 
 def main():
@@ -72,7 +80,8 @@ def main():
     with tab_help:
         st.code('examples for query at the side bar:\n\t60 > age > 32 and firstname.str.lower().str.startswith("a")')
         st.code('tables:\n\tclick column name to sort table by that column')
-    df = pd.read_excel(sys.argv[1], index_col=None)
+    df = pd.read_pickle(sys.argv[1])
+    print('done reading table')
 
     query = st.sidebar.text_area('query by table content')
     if len(query):
@@ -80,6 +89,7 @@ def main():
 
     # EDA
     eda = pandas_eda.explore.ExploreTable(df)
+    print('done analyzing data')
 
     with tab_data:
         download(df, 'data')
