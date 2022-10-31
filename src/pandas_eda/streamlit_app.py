@@ -51,8 +51,9 @@ import subprocess
 from io import BytesIO
 import streamlit as st
 import pandas as pd
+
 # from terminal, popen has different paths, so adding the package path manually
-sys.path.append(os.path.dirname(__file__)+'/../')
+sys.path.append(os.path.dirname(__file__) + '/../')
 import pandas_eda
 
 
@@ -89,14 +90,32 @@ def main():
 
     # EDA
     eda = pandas_eda.explore.ExploreTable(df)
+    columns_statistics = eda.get_columns_statistics().reset_index()
+    small_table_to_show = df.copy()
+    # now trying to avoid this error:
+    # MessageSizeError: Data of size 234.2 MB exceeds the message size limit of 200.0 MB.
+    while True:
+        mem_size = small_table_to_show.memory_usage(deep=True).div(1024 ** 2).sum()
+        if mem_size < 200:
+            break
+        rows = int(small_table_to_show.shape[0] * 200 / mem_size) - 1
+        rows = pd.Series(small_table_to_show.index).sample(rows).sort_index()
+        small_table_to_show = small_table_to_show.iloc[rows]
     print('done analyzing data')
 
     with tab_data:
-        download(df, 'data')
+        if small_table_to_show.shape != df.shape:
+            st.warning(f'table is too big! showing only {small_table_to_show.shape[0]:,} rows out of {df.shape[0]:,}')
+        download(small_table_to_show, 'data')
 
     with tab_statistics:
         st.subheader('columns statistics:')
-        download(eda.get_columns_statistics().reset_index(), 'statistics')
+        download(columns_statistics, 'statistics')
+
+        mem_size = df.memory_usage(deep=True).div(1024 ** 2).rename('MB')
+        st.info(f'total table size is: {mem_size.sum():.3f} MB')
+        st.subheader('size of each column')
+        st.columns(4)[0].table(mem_size.to_frame().style.bar(color='#ead9ff').format('{:.3f}'))
 
     with tab_frequent_values:
         st.subheader('frequent values:')
@@ -105,13 +124,17 @@ def main():
         download(frequent, 'frequent_values')
 
     st.sidebar.header('frequent values per column:')
+    st.sidebar.code(f'table contains {df.shape[0]:,} rows')
     freq = eda.get_frequent_values()
     for col in freq.col.unique():
-        st.sidebar.info(col)
-        show = freq.query(f'col=="{col}"').set_index('value').bar
-        show.name = 'percentages'
-        show.index = show.index.astype(str)
-        st.sidebar.write(show)
+        single_col_statistics = columns_statistics.astype(dict(col=str))
+        single_col_statistics = single_col_statistics.query(f'col=="{col}"').iloc[0]
+
+        st.sidebar.info(f'{col} [{single_col_statistics.uniques:,} uniques, {single_col_statistics.nans:,} nans]')
+        show = freq.query(f'col=="{col}"').set_index('value')
+        for index, row in show.iterrows():
+            st.sidebar.write(f'{index}: [#{row.counts:,}]')
+            st.sidebar.progress(row.percentages)
 
 
 if __name__ == '__main__':
@@ -120,4 +143,4 @@ if __name__ == '__main__':
         main()
     else:
         argv = ["streamlit", "run", sys.argv[0]]
-        subprocess.run([f"{sys.executable}", "-m"]+argv)
+        subprocess.run([f"{sys.executable}", "-m"] + argv)
