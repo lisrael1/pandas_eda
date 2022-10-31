@@ -76,6 +76,9 @@ def download(df, output_name):
 
 def main():
     st.set_page_config(layout="wide")
+
+    st.header('pandas eda')
+    number_of_most_frequent_values = st.sidebar.slider('number of most frequent values to show', 2, 10, 6)
     tab_statistics, tab_frequent_values, tab_data, tab_help = st.tabs(['statistics', 'frequent values', 'data', 'help'])
 
     with tab_help:
@@ -90,16 +93,18 @@ def main():
         df = df.query(query)
 
     # EDA
-    eda = pandas_eda.explore.ExploreTable(df)
+    eda = pandas_eda.explore.ExploreTable(df, number_of_most_frequent_values=number_of_most_frequent_values)
     columns_statistics = eda.get_columns_statistics().reset_index()
     small_table_to_show = df.copy()
+    mem_size = df.memory_usage(deep=True).div(1024 ** 2).rename('MB')
+
     # now trying to avoid this error:
     # MessageSizeError: Data of size 234.2 MB exceeds the message size limit of 200.0 MB.
     while True:
-        mem_size = small_table_to_show.memory_usage(deep=True).div(1024 ** 2).sum()
-        if mem_size < 200:
+        display_table_mem_size = small_table_to_show.memory_usage(deep=True).div(1024 ** 2).sum()
+        if display_table_mem_size < 200:
             break
-        rows = int(small_table_to_show.shape[0] * 200 / mem_size) - 1
+        rows = int(small_table_to_show.shape[0] * 200 / display_table_mem_size) - 1
         rows = pd.Series(small_table_to_show.index).sample(rows).sort_index()
         small_table_to_show = small_table_to_show.loc[rows]
     print('done analyzing data')
@@ -115,7 +120,6 @@ def main():
         st.subheader('columns statistics:')
         download(columns_statistics, 'statistics')
 
-        mem_size = df.memory_usage(deep=True).div(1024 ** 2).rename('MB')
         st.subheader('size of each column')
         st.columns(4)[0].table(mem_size.to_frame().style.bar(color='#ead9ff').format('{:.3f}'))
 
