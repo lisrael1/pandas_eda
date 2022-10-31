@@ -81,6 +81,7 @@ def main():
     with tab_help:
         st.code('examples for query at the side bar:\n\t60 > age > 32 and firstname.str.lower().str.startswith("a")')
         st.code('tables:\n\tclick column name to sort table by that column')
+        st.code(f'table is temporary saved at\n\t{sys.argv[1]}')
     df = pd.read_pickle(sys.argv[1])
     print('done reading table')
 
@@ -100,7 +101,7 @@ def main():
             break
         rows = int(small_table_to_show.shape[0] * 200 / mem_size) - 1
         rows = pd.Series(small_table_to_show.index).sample(rows).sort_index()
-        small_table_to_show = small_table_to_show.iloc[rows]
+        small_table_to_show = small_table_to_show.loc[rows]
     print('done analyzing data')
 
     with tab_data:
@@ -109,11 +110,12 @@ def main():
         download(small_table_to_show, 'data')
 
     with tab_statistics:
+        st.subheader('table statistics:')
+        st.code(f'{mem_size.sum():.3f} MB\n{df.shape[0]:,} rows\n{df.shape[1]:,} columns')
         st.subheader('columns statistics:')
         download(columns_statistics, 'statistics')
 
         mem_size = df.memory_usage(deep=True).div(1024 ** 2).rename('MB')
-        st.info(f'total table size is: {mem_size.sum():.3f} MB')
         st.subheader('size of each column')
         st.columns(4)[0].table(mem_size.to_frame().style.bar(color='#ead9ff').format('{:.3f}'))
 
@@ -124,7 +126,6 @@ def main():
         download(frequent, 'frequent_values')
 
     st.sidebar.header('frequent values per column:')
-    st.sidebar.code(f'table contains {df.shape[0]:,} rows')
     freq = eda.get_frequent_values()
     for col in freq.col.unique():
         single_col_statistics = columns_statistics.astype(dict(col=str))
