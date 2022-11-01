@@ -6,8 +6,7 @@ import pandas_eda
 from faker import Faker
 
 
-def generate_fake_table():
-    samples = 500
+def generate_fake_table(samples=500):
     fake = Faker()
     df = pd.DataFrame()
     df['firstname'] = [fake.first_name_nonbinary() for _ in range(samples)]
@@ -19,6 +18,6 @@ def generate_fake_table():
     return df
 
 
-df = generate_fake_table()
+df = generate_fake_table(600)
 df.eda()
 sleep(600)

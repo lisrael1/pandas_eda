@@ -10,8 +10,7 @@ pd.options.display.max_rows = 100
 pd.options.display.min_rows = 20
 
 
-def generate_fake_table():
-    samples = 500
+def generate_fake_table(samples=500):
     fake = Faker()
     df = pd.DataFrame()
     df['firstname'] = [fake.first_name_nonbinary() for _ in range(samples)]

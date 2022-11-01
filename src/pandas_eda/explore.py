@@ -4,7 +4,7 @@ import scipy.stats
 from tqdm import tqdm
 
 
-def bar(percentages):
+def bar(percentages: int):
     """
         percentages - 0 to 100
         return string bar like this |#####_____|
@@ -13,12 +13,12 @@ def bar(percentages):
                  total=10,
                  gui=True,
                  ncols=12,
-                 bar_format='|{bar}|', ascii=True))\
+                 bar_format='|{bar}|', ascii=True)) \
         .replace(" ", "_")
     return p
 
 
-def entropy(labels, base=2):
+def entropy(labels: list, base: int = 2):
     value, counts = np.unique(labels, return_counts=True)
     # if it's pd.Series you can use: counts = labels.value_counts(normalize=True, sort=False),
     # but it's 20x times slower
@@ -42,7 +42,7 @@ class ExploreTable:
         eda.get_frequent_values()
     """
 
-    def __init__(self, df, number_of_most_frequent_values=6):
+    def __init__(self, df: pd.DataFrame, number_of_most_frequent_values: int = 6):
         self.number_of_most_frequent_values = number_of_most_frequent_values
 
         # original table

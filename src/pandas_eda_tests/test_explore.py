@@ -26,7 +26,7 @@ class TestExploreTable(unittest.TestCase):
             return df
 
         tests = 10
-        for samples in np.random.randint(1, 100, tests).tolist()+[1]:
+        for samples in np.random.randint(1, 100, tests).tolist() + [1]:
             df = generate_fake_table(samples)
             eda = pandas_eda.explore.ExploreTable(df)
             self.assertTrue(eda.statistics.uniques[0] == samples, 'error with nan detection')
@@ -38,4 +38,3 @@ class TestExploreTable(unittest.TestCase):
         eda = pandas_eda.explore.ExploreTable(df)
         df = pd.DataFrame(index=list('abc'))
         eda = pandas_eda.explore.ExploreTable(df)
-

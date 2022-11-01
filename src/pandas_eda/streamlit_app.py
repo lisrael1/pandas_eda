@@ -57,7 +57,7 @@ sys.path.append(os.path.dirname(__file__) + '/../')
 import pandas_eda
 
 
-def download(df, output_name):
+def download(df: pd.DataFrame, output_name: str):
     st.write(df)
 
     size_mb = df.memory_usage(deep=True).sum() / 1024 ** 2
@@ -108,7 +108,8 @@ class Main:
 
     def config(self):
         with self.tab_config:
-            self.number_of_most_frequent_values = st.columns(3)[0].slider('number of most frequent values to show', 2, 10, 6)
+            self.number_of_most_frequent_values = st.columns(3)[0].slider('number of most frequent values to show', 2,
+                                                                          10, 6)
 
             columns = st.columns([2, 1])
             query = columns[0].text_area('query by table content')
