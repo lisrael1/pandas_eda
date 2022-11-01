@@ -74,78 +74,122 @@ def download(df, output_name):
                            data=output.getvalue(), file_name=f'{output_name}.csv')
 
 
-def main():
-    st.set_page_config(layout="wide")
+class Main:
+    def __init__(self):
 
-    st.header('pandas eda')
-    number_of_most_frequent_values = st.sidebar.slider('number of most frequent values to show', 2, 10, 6)
-    tab_statistics, tab_frequent_values, tab_data, tab_help = st.tabs(['statistics', 'frequent values', 'data', 'help'])
+        self.number_of_most_frequent_values = None
+        self.df = None
+        self.eda = None
+        self.columns_statistics = None
+        self.small_table_to_show = None
+        self.mem_size = None
 
-    with tab_help:
-        st.code('examples for query at the side bar:\n\t60 > age > 32 and firstname.str.lower().str.startswith("a")')
-        st.code('tables:\n\tclick column name to sort table by that column')
-        st.code(f'table is temporary saved at\n\t{sys.argv[1]}')
-    df = pd.read_pickle(sys.argv[1])
-    print('done reading table')
+        st.set_page_config(layout="wide")
 
-    query = st.sidebar.text_area('query by table content')
-    if len(query):
-        df = df.query(query)
+        st.header('pandas eda')
+        (self.tab_statistics,
+         self.tab_sizes,
+         self.tab_frequent_values,
+         self.tab_data,
+         self.tab_config,
+         self.tab_help) = st.tabs(['statistics', 'table size', 'frequent values', 'data', 'config', 'help'])
 
-    # EDA
-    eda = pandas_eda.explore.ExploreTable(df, number_of_most_frequent_values=number_of_most_frequent_values)
-    columns_statistics = eda.get_columns_statistics().reset_index()
-    small_table_to_show = df.copy()
-    mem_size = df.memory_usage(deep=True).div(1024 ** 2).rename('MB')
+        self.df = pd.read_pickle(sys.argv[1])
 
-    # now trying to avoid this error:
-    # MessageSizeError: Data of size 234.2 MB exceeds the message size limit of 200.0 MB.
-    while True:
-        display_table_mem_size = small_table_to_show.memory_usage(deep=True).div(1024 ** 2).sum()
-        if display_table_mem_size < 200:
-            break
-        rows = int(small_table_to_show.shape[0] * 200 / display_table_mem_size) - 1
-        rows = pd.Series(small_table_to_show.index).sample(rows).sort_index()
-        small_table_to_show = small_table_to_show.loc[rows]
-    print('done analyzing data')
+        self.config()
+        self.analyze()
+        self.show_data()
+        self.show_statistics()
+        self.show_sizes()
+        self.show_frequent_values()
+        self.help()
 
-    with tab_data:
-        if small_table_to_show.shape != df.shape:
-            st.warning(f'table is too big! showing only {small_table_to_show.shape[0]:,} rows out of {df.shape[0]:,}')
-        download(small_table_to_show, 'data')
+        print('done reading table')
 
-    with tab_statistics:
-        st.subheader('table statistics:')
-        st.code(f'{mem_size.sum():.3f} MB\n{df.shape[0]:,} rows\n{df.shape[1]:,} columns')
-        st.subheader('columns statistics:')
-        download(columns_statistics, 'statistics')
+    def config(self):
+        with self.tab_config:
+            self.number_of_most_frequent_values = st.columns(3)[0].slider('number of most frequent values to show', 2, 10, 6)
 
-        st.subheader('size of each column')
-        st.columns(4)[0].table(mem_size.to_frame().style.bar(color='#ead9ff').format('{:.3f}'))
+            columns = st.columns([2, 1])
+            query = columns[0].text_area('query by table content')
+            if len(query):
+                st.sidebar.warning('showing filtered data!')
+                self.df = self.df.query(query)
 
-    with tab_frequent_values:
-        st.subheader('frequent values:')
-        frequent = eda.get_frequent_values()
-        frequent.value = frequent.value.astype(str)  # streamlit issue
-        download(frequent, 'frequent_values')
+            columns_to_drop = columns[1].multiselect('select columns to ignore', self.df.columns.tolist())
+            if len(columns_to_drop):
+                self.df = self.df.drop(columns=columns_to_drop)
 
-    st.sidebar.header('frequent values per column:')
-    freq = eda.get_frequent_values()
-    for col in freq.col.unique():
-        single_col_statistics = columns_statistics.astype(dict(col=str))
-        single_col_statistics = single_col_statistics.query(f'col=="{col}"').iloc[0]
+    def help(self):
+        with self.tab_help:
+            st.code(
+                'examples for query at the config tab:\n\t60 > age > 32 and firstname.str.lower().str.startswith("a")')
+            st.code('tables:\n\tclick column name to sort table by that column')
+            st.code(f'table is temporary saved at\n\t{sys.argv[1]}')
 
-        st.sidebar.info(f'{col} [{single_col_statistics.uniques:,} uniques, {single_col_statistics.nans:,} nans]')
-        show = freq.query(f'col=="{col}"').set_index('value')
-        for index, row in show.iterrows():
-            st.sidebar.write(f'{index}: [#{row.counts:,}]')
-            st.sidebar.progress(row.percentages)
+    def analyze(self):
+        # EDA
+        self.eda = pandas_eda.explore.ExploreTable(self.df,
+                                                   number_of_most_frequent_values=self.number_of_most_frequent_values)
+        self.columns_statistics = self.eda.get_columns_statistics().reset_index()
+        self.small_table_to_show = self.df.copy()
+        self.mem_size = self.df.memory_usage(deep=True).div(1024 ** 2).rename('MB')
+
+        # now trying to avoid this error:
+        # MessageSizeError: Data of size 234.2 MB exceeds the message size limit of 200.0 MB.
+        while True:
+            display_table_mem_size = self.small_table_to_show.memory_usage(deep=True).div(1024 ** 2).sum()
+            if display_table_mem_size < 200:
+                break
+            rows = int(self.small_table_to_show.shape[0] * 200 / display_table_mem_size) - 1
+            rows = pd.Series(self.small_table_to_show.index).sample(rows).sort_index()
+            self.small_table_to_show = self.small_table_to_show.loc[rows]
+        print('done analyzing data')
+
+    def show_data(self):
+        with self.tab_data:
+            if self.small_table_to_show.shape != self.df.shape:
+                st.warning(
+                    f'table is too big! showing only {self.small_table_to_show.shape[0]:,} rows out of {self.df.shape[0]:,}')
+            download(self.small_table_to_show, 'data')
+
+    def show_statistics(self):
+        with self.tab_statistics:
+            st.subheader('columns statistics:')
+            download(self.columns_statistics, 'statistics')
+
+    def show_sizes(self):
+        with self.tab_sizes:
+            st.subheader('table statistics:')
+            st.code(f'{self.mem_size.sum():.3f} MB\n{self.df.shape[0]:,} rows\n{self.df.shape[1]:,} columns')
+
+            st.subheader('size of each column:')
+            st.columns(4)[0].table(self.mem_size.to_frame().style.bar(color='#ead9ff').format('{:.3f}'))
+
+    def show_frequent_values(self):
+        with self.tab_frequent_values:
+            st.subheader('frequent values:')
+            frequent = self.eda.get_frequent_values()
+            frequent.value = frequent.value.astype(str)  # streamlit issue
+            download(frequent, 'frequent_values')
+
+        st.sidebar.header('frequent values per column:')
+        freq = self.eda.get_frequent_values()
+        for col in freq.col.unique():
+            single_col_statistics = self.columns_statistics.astype(dict(col=str))
+            single_col_statistics = single_col_statistics.query(f'col=="{col}"').iloc[0]
+
+            st.sidebar.info(f'{col} [{single_col_statistics.uniques:,} uniques, {single_col_statistics.nans:,} nans]')
+            show = freq.query(f'col=="{col}"').set_index('value')
+            for index, row in show.iterrows():
+                st.sidebar.write(f'{index}: [#{row.counts:,}]')
+                st.sidebar.progress(row.percentages)
 
 
 if __name__ == '__main__':
     if st._is_running_with_streamlit:
         # this code cannot really work as we dont have sys.argv[1] that contains the table to show...
-        main()
+        Main()
     else:
         argv = ["streamlit", "run", sys.argv[0]]
         subprocess.run([f"{sys.executable}", "-m"] + argv)
