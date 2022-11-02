@@ -8,6 +8,7 @@ from codetiming import Timer
 import pandas as pd
 import pandas_eda.streamlit_app
 import pandas_eda.explore
+import pandas_eda._testing
 
 
 def eda(df):
