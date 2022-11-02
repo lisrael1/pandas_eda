@@ -56,6 +56,8 @@ import pandas as pd
 sys.path.append(os.path.dirname(__file__) + '/../')
 import pandas_eda
 
+pd.options.plotting.backend = "plotly"
+
 
 def download(df: pd.DataFrame, output_name: str):
     st.write(df)
@@ -83,6 +85,7 @@ class Main:
         self.columns_statistics = None
         self.small_table_to_show = None
         self.mem_size = None
+        self.plot_hist = None
 
         st.set_page_config(layout="wide")
 
@@ -108,8 +111,13 @@ class Main:
 
     def config(self):
         with self.tab_config:
-            self.number_of_most_frequent_values = st.columns(3)[0].slider('number of most frequent values to show', 2,
-                                                                          10, 6)
+            columns = st.columns(4)
+            self.plot_hist = columns[0].checkbox('plot histogram at numeric columns')
+            self.number_of_most_frequent_values = columns[0]\
+                .slider('number of most frequent values to display', 2, 10, 6)
+            columns_to_drop = columns[0].multiselect('select columns to ignore', self.df.columns.tolist())
+            if len(columns_to_drop):
+                self.df = self.df.drop(columns=columns_to_drop)
 
             columns = st.columns([2, 1])
             query = columns[0].text_area('query by table content')
@@ -117,9 +125,6 @@ class Main:
                 st.sidebar.warning('showing filtered data!')
                 self.df = self.df.query(query)
 
-            columns_to_drop = columns[1].multiselect('select columns to ignore', self.df.columns.tolist())
-            if len(columns_to_drop):
-                self.df = self.df.drop(columns=columns_to_drop)
 
     def help(self):
         with self.tab_help:
@@ -174,6 +179,7 @@ class Main:
             frequent.value = frequent.value.astype(str)  # streamlit issue
             download(frequent, 'frequent_values')
 
+        # now the sidebar
         st.sidebar.header('frequent values per column:')
         freq = self.eda.get_frequent_values()
         for col in freq.col.unique():
@@ -185,6 +191,10 @@ class Main:
             for index, row in show.iterrows():
                 st.sidebar.write(f'{index}: [#{row.counts:,}]')
                 st.sidebar.progress(row.percentages)
+
+            if self.plot_hist:
+                if pd.api.types.is_numeric_dtype(self.df[col]) and single_col_statistics.uniques > show.shape[0]:
+                    st.sidebar.plotly_chart(self.df.plot.hist(x=col, height=300), use_container_width=True)
 
 
 if __name__ == '__main__':
