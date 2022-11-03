@@ -209,12 +209,16 @@ class Main:
             st.sidebar.info(f'{col} [{single_col_statistics.uniques:,} uniques, {single_col_statistics.nans:,} nans]')
             show = freq.query(f'col=="{col}"').set_index('value')
             for index, row in show.iterrows():
-                st.sidebar.write(f'{index}: [#{row.counts:,}]')
+                st.sidebar.write(f'{index}: [#{row.counts:,}, {row.counts/self.df.shape[0]:.2%}]')
                 st.sidebar.progress(row.percentages)
 
             if self.plot_hist:
                 if pd.api.types.is_numeric_dtype(self.df[col]) and single_col_statistics.uniques > show.shape[0]:
-                    bins = st.sidebar.slider('number of bins', 0, min(self.df[col].nunique(), 300), 0)
+                    bins = st.sidebar.slider('number of bins',
+                                             0,
+                                             min(self.df[col].nunique(), 300),
+                                             0,
+                                             key=f'nbins {col}')
                     bins = bins if bins > 1 else None
                     st.sidebar.plotly_chart(self.df.plot.hist(x=col, height=300, nbins=bins),
                                             use_container_width=True)
