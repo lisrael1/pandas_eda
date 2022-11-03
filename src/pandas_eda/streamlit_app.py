@@ -111,9 +111,9 @@ class Main:
 
     def config(self):
         with self.tab_config:
-            columns = st.columns(4)
+            columns = st.columns(3)
             self.plot_hist = columns[0].checkbox('plot histogram at numeric columns')
-            self.number_of_most_frequent_values = columns[0]\
+            self.number_of_most_frequent_values = columns[0] \
                 .slider('number of most frequent values to display', 2, 10, 6)
             columns_to_drop = columns[0].multiselect('select columns to ignore', self.df.columns.tolist())
             if len(columns_to_drop):
@@ -124,7 +124,6 @@ class Main:
             if len(query):
                 st.sidebar.warning('showing filtered data!')
                 self.df = self.df.query(query)
-
 
     def help(self):
         with self.tab_help:
@@ -194,7 +193,10 @@ class Main:
 
             if self.plot_hist:
                 if pd.api.types.is_numeric_dtype(self.df[col]) and single_col_statistics.uniques > show.shape[0]:
-                    st.sidebar.plotly_chart(self.df.plot.hist(x=col, height=300), use_container_width=True)
+                    bins = st.sidebar.slider('number of bins', 0, self.df[col].nunique(), 0)
+                    bins = bins if bins > 1 else None
+                    st.sidebar.plotly_chart(self.df.plot.hist(x=col, height=300, nbins=bins),
+                                            use_container_width=True)
 
 
 if __name__ == '__main__':
