@@ -51,6 +51,7 @@ import subprocess
 from io import BytesIO
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 
 # from terminal, popen has different paths, so adding the package path manually
 sys.path.append(os.path.dirname(__file__) + '/../')
@@ -76,6 +77,18 @@ def download(df: pd.DataFrame, output_name: str):
                            data=output.getvalue(), file_name=f'{output_name}.csv')
 
 
+def add_suffix_to_duplicated_columns(columns):
+    """
+        usage:
+            df.columns = add_suffix_to_duplicated_columns(df.columns)
+    :param columns:
+    :return:
+    """
+    cols = columns.rename('col_name').to_frame().reset_index(drop=True)
+    cols['suffix'] = cols.groupby('col_name').col_name.cumcount().astype(str).radd('_').replace('_0', '')
+    return cols.sum(1)
+
+
 class Main:
     def __init__(self):
 
@@ -97,8 +110,7 @@ class Main:
          self.tab_config,
          self.tab_help) = st.tabs(['statistics', 'table size', 'frequent values', 'data', 'config', 'help'])
 
-        self.df = pd.read_pickle(sys.argv[1])
-
+        self.read_table()
         self.config()
         self.analyze()
         self.show_data()
@@ -108,6 +120,11 @@ class Main:
         self.help()
 
         print('done reading table')
+
+    def read_table(self):
+        self.df = pd.read_pickle(sys.argv[1])
+        self.df.columns = self.df.columns.astype(str)  # in case one of the columns is integer
+        self.df.columns = add_suffix_to_duplicated_columns(self.df.columns)
 
     def config(self):
         with self.tab_config:
@@ -169,7 +186,11 @@ class Main:
             st.code(f'{self.mem_size.sum():.3f} MB\n{self.df.shape[0]:,} rows\n{self.df.shape[1]:,} columns')
 
             st.subheader('size of each column:')
-            st.columns(4)[0].table(self.mem_size.to_frame().style.bar(color='#ead9ff').format('{:.3f}'))
+            columns = st.columns([1, 3])
+            columns[0].table(self.mem_size.to_frame().style.bar(color='#ead9ff').format('{:.3f}'))
+            fig = px.pie(self.mem_size.to_frame().reset_index(), names='index', values='MB', hole=0.4)
+            fig.update_traces(texttemplate="%{label}:<br>%{value:,.3f}MB<br>%{percent:.0%}",)
+            columns[1].plotly_chart(fig)
 
     def show_frequent_values(self):
         with self.tab_frequent_values:
@@ -193,7 +214,7 @@ class Main:
 
             if self.plot_hist:
                 if pd.api.types.is_numeric_dtype(self.df[col]) and single_col_statistics.uniques > show.shape[0]:
-                    bins = st.sidebar.slider('number of bins', 0, self.df[col].nunique(), 0)
+                    bins = st.sidebar.slider('number of bins', 0, min(self.df[col].nunique(), 300), 0)
                     bins = bins if bins > 1 else None
                     st.sidebar.plotly_chart(self.df.plot.hist(x=col, height=300, nbins=bins),
                                             use_container_width=True)
