@@ -13,7 +13,7 @@ But you cannot do values_counts, isna and all those stuffs every second...
 You will be focused on what you have on the spot.
 
 **Demo** is the best way to understand:  
-[![demo](https://github.com/lisrael1/pandas_eda/blob/master/front.jpg?raw=True)](https://youtu.be/kHT6MshXb04)
+[![demo](https://github.com/lisrael1/pandas_eda/blob/master/screenshots/front.jpg?raw=True)](https://youtu.be/kHT6MshXb04)
 
 **install:**
 
