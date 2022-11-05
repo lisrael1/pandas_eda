@@ -26,8 +26,5 @@ def generate_fake_table(samples=500):
 
     # dummy value
     df['agree'] = np.random.choice([True, False], samples)
-    col = df.columns.tolist()
-    col[-2] = 'agree'
-    df.columns = col
 
     return df

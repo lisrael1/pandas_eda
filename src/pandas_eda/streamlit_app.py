@@ -48,6 +48,7 @@ if 1:
 import sys
 import os
 import subprocess
+import traceback
 from io import BytesIO
 import streamlit as st
 import pandas as pd
@@ -103,12 +104,13 @@ class Main:
         st.set_page_config(layout="wide")
 
         st.header('pandas eda')
-        (self.tab_statistics,
-         self.tab_sizes,
-         self.tab_frequent_values,
-         self.tab_data,
-         self.tab_config,
-         self.tab_help) = st.tabs(['statistics', 'table size', 'frequent values', 'data', 'config', 'help'])
+        (
+            self.tab_data,
+            self.tab_statistics,
+            self.tab_sizes,
+            self.tab_frequent_values,
+            self.tab_config,
+            self.tab_help) = st.tabs(['data', 'statistics', 'table size', 'frequent values', 'config', 'help'])
 
         self.read_table()
         self.config()
@@ -137,17 +139,23 @@ class Main:
                 self.df = self.df.drop(columns=columns_to_drop)
 
             columns = st.columns([2, 1])
-            query = columns[0].text_area('query by table content')
+            query = columns[0].text_area('filter content with pandas query')
             if len(query):
-                st.sidebar.warning('showing filtered data!')
-                self.df = self.df.query(query)
+                try:
+                    self.df = self.df.query(query)
+                    st.sidebar.warning('showing filtered data by the query at the config tab!')
+                except (pd.errors.UndefinedVariableError, SyntaxError):
+                    st.error('cannot use this query due to:')
+                    st.code(traceback.format_exc())
 
     def help(self):
         with self.tab_help:
             st.code(
-                'examples for query at the config tab:\n\t60 > age > 32 and firstname.str.lower().str.startswith("a")')
-            st.code('tables:\n\tclick column name to sort table by that column')
-            st.code(f'table is temporary saved at\n\t{sys.argv[1]}')
+                'examples for query at the config tab:'
+                '\n\t60 > age > 32 and firstname.str.lower().str.startswith("a")'
+                '\nat the "table size" tab, the size will be after filleting.')
+            st.code('tables:\n\tclick column name to sort table by that column.')
+            st.code(f'table at this session is temporary saved at\n\t{sys.argv[1]}')
 
     def analyze(self):
         # EDA
@@ -189,7 +197,7 @@ class Main:
             columns = st.columns([1, 3])
             columns[0].table(self.mem_size.to_frame().style.bar(color='#ead9ff').format('{:.3f}'))
             fig = px.pie(self.mem_size.to_frame().reset_index(), names='index', values='MB', hole=0.4)
-            fig.update_traces(texttemplate="%{label}:<br>%{value:,.3f}MB<br>%{percent:.0%}",)
+            fig.update_traces(texttemplate="%{label}:<br>%{value:,.3f}MB<br>%{percent:.0%}", )
             columns[1].plotly_chart(fig)
 
     def show_frequent_values(self):
@@ -209,7 +217,7 @@ class Main:
             st.sidebar.info(f'{col} [{single_col_statistics.uniques:,} uniques, {single_col_statistics.nans:,} nans]')
             show = freq.query(f'col=="{col}"').set_index('value')
             for index, row in show.iterrows():
-                st.sidebar.write(f'{index}: [#{row.counts:,}, {row.counts/self.df.shape[0]:.2%}]')
+                st.sidebar.write(f'{index}: [#{row.counts:,}, {row.counts / self.df.shape[0]:.2%}]')
                 st.sidebar.progress(row.percentages)
 
             if self.plot_hist:
