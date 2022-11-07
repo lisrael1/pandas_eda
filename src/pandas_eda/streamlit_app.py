@@ -194,10 +194,12 @@ class Main:
             st.code(f'{self.mem_size.sum():.3f} MB\n{self.df.shape[0]:,} rows\n{self.df.shape[1]:,} columns')
 
             st.subheader('size of each column:')
-            columns = st.columns([1, 3])
+            columns = st.columns([1, 2])
             columns[0].table(self.mem_size.to_frame().style.bar(color='#ead9ff').format('{:.3f}'))
             fig = px.pie(self.mem_size.to_frame().reset_index(), names='index', values='MB', hole=0.4)
             fig.update_traces(texttemplate="%{label}:<br>%{value:,.3f}MB<br>%{percent:.0%}", )
+            if columns[1].checkbox('remove labels from pie chart', value=self.mem_size.shape[0]>10):
+                fig.update_traces(texttemplate='', textinfo="none", )
             columns[1].plotly_chart(fig)
 
     def show_frequent_values(self):

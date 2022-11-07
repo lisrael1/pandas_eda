@@ -6,12 +6,12 @@ pd.options.display.max_colwidth = 40
 pd.options.display.max_columns = 0
 pd.options.display.max_rows = 100
 pd.options.display.min_rows = 20
-
+display = print
 
 df = pandas_eda._testing.generate_fake_table()
 eda = pandas_eda.explore.ExploreTable(df)
 
 print('\n\n *** column statistics *** ')
-print(eda.get_columns_statistics())
+display(eda.get_columns_statistics())
 print('\n\n *** frequent values *** ')
-print(eda.get_frequent_values())
+display(eda.get_frequent_values())
