@@ -50,6 +50,8 @@ import os
 import subprocess
 import traceback
 from io import BytesIO
+import pkg_resources
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -235,7 +237,11 @@ class Main:
 
 
 if __name__ == '__main__':
-    if st._is_running_with_streamlit:
+    if pkg_resources.parse_version(st.__version__).release > (1, 13, 0):
+        already_running = st.runtime.exists()
+    else:
+        already_running = st._is_running_with_streamlit
+    if already_running:
         # this code cannot really work as we dont have sys.argv[1] that contains the table to show...
         Main()
     else:
