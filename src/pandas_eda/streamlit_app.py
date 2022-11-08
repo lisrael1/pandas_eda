@@ -242,7 +242,6 @@ if __name__ == '__main__':
     else:
         already_running = st._is_running_with_streamlit
     if already_running:
-        # this code cannot really work as we dont have sys.argv[1] that contains the table to show...
         Main()
     else:
         argv = ["streamlit", "run", sys.argv[0]]
