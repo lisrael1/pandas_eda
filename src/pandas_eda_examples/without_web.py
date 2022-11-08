@@ -9,7 +9,7 @@ pd.options.display.min_rows = 20
 display = print
 
 df = pandas_eda._testing.generate_fake_table()
-eda = pandas_eda.explore.ExploreTable(df)
+eda = df.eda(True)
 
 print('\n\n *** column statistics *** ')
 display(eda.get_columns_statistics())

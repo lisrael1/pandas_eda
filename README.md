@@ -63,7 +63,7 @@ pd.options.display.max_columns = 0
 pd.options.display.min_rows = 20
 
 df = pandas_eda._testing.generate_fake_table(samples=1_000)
-eda = pandas_eda.explore.ExploreTable(df)
+eda = df.eda(cli_mode=True)
 
 print('\n\n *** column statistics *** ')
 print(eda.get_columns_statistics())

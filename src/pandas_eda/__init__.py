@@ -30,4 +30,5 @@ def eda_exit_handler(process, temp_file_name):
     os.remove(temp_file_name)
 
 
-pd.core.frame.DataFrame.eda = lambda df: pandas_eda.eda(df)
+pd.core.frame.DataFrame.eda = lambda df, cli_mode=False: \
+    pandas_eda.explore.ExploreTable(df) if cli_mode else pandas_eda.eda(df)
