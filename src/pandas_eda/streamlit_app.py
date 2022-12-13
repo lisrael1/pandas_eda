@@ -58,7 +58,7 @@ import plotly.express as px
 
 # from terminal, popen has different paths, so adding the package path manually
 sys.path.append(os.path.dirname(__file__) + '/../')
-import pandas_eda
+import pandas_eda.explore
 
 pd.options.plotting.backend = "plotly"
 
