@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="pandas_eda",
-    version="1.0.8",
+    version="1.0.9",
     author="Lior Israeli",
     author_email="israelilior@gmail.com",
     description="Exploratory Data Analysis app to display table and frequent values for each column",

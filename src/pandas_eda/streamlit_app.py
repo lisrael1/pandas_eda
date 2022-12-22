@@ -52,7 +52,6 @@ import traceback
 from io import BytesIO
 import pkg_resources
 
-import streamlit as st
 import pandas as pd
 import plotly.express as px
 
@@ -94,7 +93,6 @@ def add_suffix_to_duplicated_columns(columns):
 
 class Main:
     def __init__(self):
-
         self.number_of_most_frequent_values = None
         self.df = None
         self.eda = None
@@ -249,9 +247,10 @@ class Main:
                 st.sidebar.progress(row.percentages)
 
 
-
-
 if __name__ == '__main__':
+    # importing streamlit is a bit slow, so moving it to here
+    import streamlit as st
+
     if pkg_resources.parse_version(st.__version__).release > (1, 13, 0):
         already_running = st.runtime.exists()
     else:
