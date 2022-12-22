@@ -102,6 +102,7 @@ class Main:
         self.small_table_to_show = None
         self.mem_size = None
         self.plot_hist = None
+        self.preserve_column_order_at_sidebar = None
 
         st.set_page_config(layout="wide")
 
@@ -120,7 +121,8 @@ class Main:
         self.show_data()
         self.show_statistics()
         self.show_sizes()
-        self.show_frequent_values()
+        self.show_frequent_values_at_main()
+        self.show_frequent_values_at_sidebar()
         self.help()
 
         print('done reading table')
@@ -134,6 +136,7 @@ class Main:
         with self.tab_config:
             columns = st.columns(3)
             self.plot_hist = columns[0].checkbox('plot histogram at numeric columns')
+            self.preserve_column_order_at_sidebar = columns[0].checkbox('preserve column order at sidebar')
             self.number_of_most_frequent_values = columns[0] \
                 .slider('number of most frequent values to display', 2, 10, 6)
             columns_to_drop = columns[0].multiselect('select columns to ignore', self.df.columns.tolist())
@@ -145,10 +148,14 @@ class Main:
             if len(query):
                 try:
                     self.df = self.df.query(query)
+                    if self.df.empty:
+                        st.sidebar.error('filtering data, at config tab, left empty table!!')
+                        st.stop()
                     st.sidebar.warning('showing filtered data by the query at the config tab!')
-                except (pd.errors.UndefinedVariableError, SyntaxError):
-                    st.error('cannot use this query due to:')
+                except (pd.errors.UndefinedVariableError, ValueError, SyntaxError):
+                    st.error('query has errors:')
                     st.code(traceback.format_exc())
+                    st.stop()
 
     def help(self):
         with self.tab_help:
@@ -204,26 +211,28 @@ class Main:
                 fig.update_traces(texttemplate='', textinfo="none", )
             columns[1].plotly_chart(fig)
 
-    def show_frequent_values(self):
+    def show_frequent_values_at_main(self):
         with self.tab_frequent_values:
             st.subheader('frequent values:')
             frequent = self.eda.get_frequent_values()
             frequent.value = frequent.value.astype(str)  # streamlit issue
             download(frequent, 'frequent_values')
 
-        # now the sidebar
+    def show_frequent_values_at_sidebar(self):
         st.sidebar.header('frequent values per column:')
         freq = self.eda.get_frequent_values()
-        for col in freq.col.unique():
+        columns = freq.col.unique()
+        if self.preserve_column_order_at_sidebar:
+            columns = self.df.columns[self.df.columns.isin(columns)].values
+        for col in columns:
             single_col_statistics = self.columns_statistics.astype(dict(col=str))
             single_col_statistics = single_col_statistics.query(f'col=="{col}"').iloc[0]
-
-            st.sidebar.info(f'{col} [{single_col_statistics.uniques:,} uniques, {single_col_statistics.nans:,} nans]')
             show = freq.query(f'col=="{col}"').set_index('value')
-            for index, row in show.iterrows():
-                st.sidebar.write(f'{index}: [#{row.counts:,}, {row.counts / self.df.shape[0]:.2%}]')
-                st.sidebar.progress(row.percentages)
 
+            # column name, uniques and nans
+            st.sidebar.info(f'{col} [{single_col_statistics.uniques:,} uniques, {single_col_statistics.nans:,} nans]')
+
+            # histogram
             if self.plot_hist:
                 if pd.api.types.is_numeric_dtype(self.df[col]) and single_col_statistics.uniques > show.shape[0]:
                     bins = st.sidebar.slider('number of bins',
@@ -234,6 +243,12 @@ class Main:
                     bins = bins if bins > 1 else None
                     st.sidebar.plotly_chart(self.df.plot.hist(x=col, height=300, nbins=bins),
                                             use_container_width=True)
+            # frequent values
+            for index, row in show.iterrows():
+                st.sidebar.write(f'{index}: [#{row.counts:,}, {row.counts / self.df.shape[0]:.2%}]')
+                st.sidebar.progress(row.percentages)
+
+
 
 
 if __name__ == '__main__':
