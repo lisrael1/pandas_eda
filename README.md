@@ -36,6 +36,8 @@ df = pd._testing.makeMixedDataFrame()
 # show original data. will pop up a web application
 df.eda()  # can use this at debug mode too!
 
+# that's it. but you can do more...
+
 
 # manipulation #1
 df.A += 10
@@ -48,11 +50,11 @@ df.eda()
 
 
 # no need at jupyter or debug mode...
-# just that ending script will end the eda too, so delaying the exit. 
+# ending the script will end the eda too, so delaying the exit. 
 sleep(600)  
 ```
 
-**cli mode**
+**headless mode**
 ```python
 import pandas as pd
 import pandas_eda
