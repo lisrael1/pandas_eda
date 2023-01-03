@@ -52,6 +52,7 @@ import traceback
 from io import BytesIO
 import pkg_resources
 
+import numpy as np
 import pandas as pd
 import plotly.express as px
 
@@ -63,7 +64,8 @@ pd.options.plotting.backend = "plotly"
 
 
 def download(df: pd.DataFrame, output_name: str):
-    st.write(df)
+    # converting to int64 due to a bug at streamlit that doesn't sort int32 or int
+    st.write(df.astype(np.float64, errors='ignore').astype(np.int64, errors='ignore'))
 
     size_mb = df.memory_usage(deep=True).sum() / 1024 ** 2
     output = BytesIO()
