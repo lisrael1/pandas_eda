@@ -104,7 +104,7 @@ class Main:
         self.plot_hist = None
         self.preserve_column_order_at_sidebar = None
 
-        st.set_page_config(layout="wide")
+        st.set_page_config(layout="wide", page_title=sys.argv[2])
 
         st.header('pandas eda')
         (
@@ -207,7 +207,7 @@ class Main:
             columns[0].table(self.mem_size.to_frame().style.bar(color='#ead9ff').format('{:.3f}'))
             fig = px.pie(self.mem_size.to_frame().reset_index(), names='index', values='MB', hole=0.4)
             fig.update_traces(texttemplate="%{label}:<br>%{value:,.3f}MB<br>%{percent:.0%}", )
-            if columns[1].checkbox('remove labels from pie chart', value=self.mem_size.shape[0]>10):
+            if columns[1].checkbox('remove labels from pie chart', value=self.mem_size.shape[0] > 10):
                 fig.update_traces(texttemplate='', textinfo="none", )
             columns[1].plotly_chart(fig)
 
@@ -253,10 +253,7 @@ if __name__ == '__main__':
     # importing streamlit is a bit slow, so moving it to here
     import streamlit as st
 
-    if pkg_resources.parse_version(st.__version__).release > (1, 13, 0):
-        already_running = st.runtime.exists()
-    else:
-        already_running = st._is_running_with_streamlit
+    already_running = st.runtime.exists()
     if already_running:
         Main()
     else:

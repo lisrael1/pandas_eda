@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="pandas_eda",
-    version="1.1.0",
+    version="1.1.1",
     author="Lior Israeli",
     author_email="israelilior@gmail.com",
     description="Exploratory Data Analysis app to display table and frequent values for each column",
@@ -21,7 +21,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     package_data={"": ["*.xlsx"]},
-    install_requires=[['scipy', 'tqdm', 'pandas>1.5', 'streamlit>=1.9', 'openpyxl', 'numpy', 'faker', 'codetiming', 'plotly']],
+    install_requires=[['scipy', 'tqdm', 'pandas>1.5', 'streamlit>=1.13', 'openpyxl', 'numpy', 'faker', 'codetiming', 'plotly']],
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src", exclude=['*_tests', '*_examples'], ),
     python_requires=">=3.6",

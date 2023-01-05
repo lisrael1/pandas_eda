@@ -41,7 +41,8 @@ df.eda()  # can use this at debug mode too!
 
 # manipulation #1
 df.A += 10
-df.eda()  # yes, you can open multiple EDA windows!
+process = df.eda(title='take 2')  # yes, you can open multiple EDA windows!
+# process.kill()
 
 
 # manipulation #2
