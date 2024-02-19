@@ -34,7 +34,10 @@ def add_suffix_to_duplicated_columns(columns):
     :return:
     """
     cols = columns.rename('col_name').to_frame().reset_index(drop=True)
-    cols['suffix'] = cols.groupby('col_name').col_name.cumcount().astype(str).radd('_').replace('_0', '')
+    # if we have nan, we want to replace it with 0, but all numbers will convert to float
+    cols['suffix'] = cols.groupby('col_name').col_name.cumcount()\
+        .fillna(0).astype(int).astype(str)\
+        .radd('_').replace('_0', '')
     cols = cols.astype(str)  # in case one of the columns is integer / float
     return cols.sum(axis=1)
 

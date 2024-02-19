@@ -63,9 +63,8 @@ import pandas_eda.explore
 pd.options.plotting.backend = "plotly"
 
 
-def download(df: pd.DataFrame, output_name: str):
-    # converting to int64 due to a bug at streamlit that doesn't sort int32 or int
-    st.write(df.astype(np.float64, errors='ignore').astype(np.int64, errors='ignore'))
+def display_and_download(df: pd.DataFrame, output_name: str):
+    st.write(df)
 
     size_mb = df.memory_usage(deep=True).sum() / 1024 ** 2
     output = BytesIO()
@@ -177,12 +176,12 @@ class Main:
             if self.small_table_to_show.shape != self.df.shape:
                 st.warning(
                     f'table is too big! showing only {self.small_table_to_show.shape[0]:,} rows out of {self.df.shape[0]:,}')
-            download(self.small_table_to_show, 'data')
+            display_and_download(self.small_table_to_show, 'data')
 
     def show_statistics(self):
         with self.tab_statistics:
             st.subheader('columns statistics:')
-            download(self.columns_statistics, 'statistics')
+            display_and_download(self.columns_statistics, 'statistics')
 
     def show_sizes(self):
         with self.tab_sizes:
@@ -203,7 +202,7 @@ class Main:
             st.subheader('frequent values:')
             frequent = self.eda.get_frequent_values()
             frequent.value = frequent.value.astype(str)  # streamlit issue
-            download(frequent, 'frequent_values')
+            display_and_download(frequent, 'frequent_values')
 
     def show_frequent_values_at_sidebar(self):
         st.sidebar.header('frequent values per column:')
