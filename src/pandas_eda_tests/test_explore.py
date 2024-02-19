@@ -17,7 +17,7 @@ class TestExploreTable(unittest.TestCase):
 
         df = generate_fake_table()
         eda = pandas_eda.explore.ExploreTable(df)
-        self.assertTrue(55 > eda.statistics.nan_perc[0] > 45, 'error with nan detection')
+        self.assertTrue(55 > eda.get_columns_statistics().nan_perc[0] > 45, 'error with nan detection')
 
     def test_uniques(self):
         def generate_fake_table(samples):
@@ -29,7 +29,7 @@ class TestExploreTable(unittest.TestCase):
         for samples in np.random.randint(1, 100, tests).tolist() + [1]:
             df = generate_fake_table(samples)
             eda = pandas_eda.explore.ExploreTable(df)
-            self.assertTrue(eda.statistics.uniques[0] == samples, 'error with nan detection')
+            self.assertTrue(eda.get_columns_statistics().uniques[0] == samples, 'error with nan detection')
 
     def test_empty_table(self):
         df = pd.DataFrame()
@@ -37,4 +37,8 @@ class TestExploreTable(unittest.TestCase):
         df = pd.DataFrame(columns=list('abc'))
         eda = pandas_eda.explore.ExploreTable(df)
         df = pd.DataFrame(index=list('abc'))
+        eda = pandas_eda.explore.ExploreTable(df)
+
+    def test_columns_with_bad_names(self):
+        df = pd.DataFrame(columns=[1, None, 'hi', 'hi', '!~()'])
         eda = pandas_eda.explore.ExploreTable(df)

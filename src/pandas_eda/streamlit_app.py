@@ -81,18 +81,6 @@ def download(df: pd.DataFrame, output_name: str):
                            data=output.getvalue(), file_name=f'{output_name}.csv')
 
 
-def add_suffix_to_duplicated_columns(columns):
-    """
-        usage:
-            df.columns = add_suffix_to_duplicated_columns(df.columns)
-    :param columns:
-    :return:
-    """
-    cols = columns.rename('col_name').to_frame().reset_index(drop=True)
-    cols['suffix'] = cols.groupby('col_name').col_name.cumcount().astype(str).radd('_').replace('_0', '')
-    return cols.sum(1)
-
-
 class Main:
     def __init__(self):
         self.number_of_most_frequent_values = None
@@ -130,12 +118,11 @@ class Main:
     def read_table(self):
         self.df = pd.read_pickle(sys.argv[1])
         self.df.columns = self.df.columns.astype(str)  # in case one of the columns is integer
-        self.df.columns = add_suffix_to_duplicated_columns(self.df.columns)
 
     def config(self):
         with self.tab_config:
             columns = st.columns(3)
-            self.plot_hist = columns[0].checkbox('plot histogram at numeric columns')
+            self.plot_hist = columns[0].checkbox('plot histogram at numeric columns', True)
             self.preserve_column_order_at_sidebar = columns[0].checkbox('preserve column order at sidebar')
             self.number_of_most_frequent_values = columns[0] \
                 .slider('number of most frequent values to display', 2, 10, 6)
@@ -241,7 +228,7 @@ class Main:
                                              0,
                                              key=f'nbins {col}')
                     bins = bins if bins > 1 else None
-                    st.sidebar.plotly_chart(self.df.plot.hist(x=col, height=300, nbins=bins),
+                    st.sidebar.plotly_chart(self.df.plot.hist(x=col, height=200, nbins=bins),
                                             use_container_width=True)
             # frequent values
             for index, row in show.iterrows():

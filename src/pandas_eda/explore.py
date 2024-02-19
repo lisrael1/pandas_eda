@@ -26,6 +26,19 @@ def entropy(labels: list, base: int = 2):
     return scipy.stats.entropy(counts, base=base)
 
 
+def add_suffix_to_duplicated_columns(columns):
+    """
+        usage:
+            df.columns = add_suffix_to_duplicated_columns(df.columns)
+    :param columns:
+    :return:
+    """
+    cols = columns.rename('col_name').to_frame().reset_index(drop=True)
+    cols['suffix'] = cols.groupby('col_name').col_name.cumcount().astype(str).radd('_').replace('_0', '')
+    cols = cols.astype(str)  # in case one of the columns is integer / float
+    return cols.sum(axis=1)
+
+
 class ExploreTable:
     """
 
@@ -55,6 +68,7 @@ class ExploreTable:
         self._number_of_rows = df.shape[0]
         self._value_counts_per_column = dict()
 
+        self.df.columns = add_suffix_to_duplicated_columns(self.df.columns)
         self._value_counts()
         self._columns_statistics()
         self._most_frequent_statistics()
@@ -70,6 +84,8 @@ class ExploreTable:
         """
         # like calculating
         # self.df[col].astype(str).apply(len).mean()
+        if self._number_of_rows == 0:
+            return 0
         counts = self._value_counts_per_column[col]
         counts = counts.to_frame('counts')
         counts['value_length'] = counts.index.to_series().astype(str).apply(len)
@@ -83,6 +99,10 @@ class ExploreTable:
         return scipy.stats.entropy(counts, base=base)
 
     def _columns_statistics(self):
+        """
+        extract statistics on table, like counting nans, duplications, uniques and more
+        :return:
+        """
         results = []
         for col, values in tqdm(self._value_counts_per_column.items(), desc='statistics per column'):
             statistics = dict()
@@ -90,16 +110,29 @@ class ExploreTable:
             statistics['uniques'] = values.shape[0]
             statistics['duplications'] = self._number_of_rows - statistics['uniques']
             statistics['nans'] = values[values.index.isna()].values[0] if values.index.isna().sum() else 0
-            statistics['nan_perc'] = int(100 * statistics['nans'] / self._number_of_rows)
+            if self._number_of_rows > 0:
+                statistics['nan_perc'] = int(100 * statistics['nans'] / self._number_of_rows)
+            else:
+                statistics['nan_perc'] = 100
             statistics['avg_length'] = self._calc_average_length(col)
             statistics['entropy'] = self._calc_entropy(col)
             # diversity is normalized entropy. it's a randomness index
-            statistics['diversity_inx'] = (2 ** statistics['entropy']) / (self._number_of_rows / 100)
+            if self._number_of_rows > 0:
+                statistics['diversity_inx'] = (2 ** statistics['entropy']) / (self._number_of_rows / 100)
+            else:
+                statistics['diversity_inx'] = 0
             statistics['diversity_inx'] = round(statistics['diversity_inx'])
             results.append(statistics)
-        self.statistics_of_columns = pd.DataFrame(results).sort_values('entropy', ascending=False)
+        self.statistics_of_columns = pd.DataFrame(results)
+        if not self.statistics_of_columns.empty:
+            self.statistics_of_columns = self.statistics_of_columns.sort_values('entropy', ascending=False)
 
     def _most_frequent_statistics(self):
+        if self.statistics_of_columns.empty:
+            self.frequent_values_per_column = pd.DataFrame(
+                columns=['col', 'value', 'frequent_inx', 'counts', 'percentages', 'bar'])
+            return
+
         frequents = pd.DataFrame()
         for col in self.statistics_of_columns.col[::-1]:
             values = self._value_counts_per_column[col]
