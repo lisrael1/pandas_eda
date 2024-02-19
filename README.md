@@ -73,7 +73,10 @@ print(eda.get_columns_statistics())
 print('\n\n *** frequent values *** ')
 print(eda.get_frequent_values())
 ```
-
+**testing with**
+```bash
+python -m pandas_eda --test
+```
 **note:**  
 If you're running on remote machine, the eda will be opened on the remote...
 

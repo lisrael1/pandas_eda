@@ -3,7 +3,9 @@ import sys
 import subprocess
 import tempfile
 import atexit
+import argparse
 
+import pytest
 from codetiming import Timer
 import pandas as pd
 import pandas_eda.streamlit_app
@@ -33,3 +35,18 @@ def eda_exit_handler(process, temp_file_name):
 
 pd.core.frame.DataFrame.eda = lambda df, cli_mode=False, title='pandas eda': \
     pandas_eda.explore.ExploreTable(df) if cli_mode else pandas_eda.eda(df, title)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='pandas_eda command-line interface')
+    parser.add_argument('--test', action='store_true',
+                        help='Run tests for pandas_eda: python -m pandas_eda --test')
+
+    args = parser.parse_args()
+    if args.test:
+        # Determine the path to the current script
+        script_path = os.path.abspath(__file__)
+
+        # Determine the path to the tests directory
+        tests_dir = os.path.join(os.path.dirname(script_path), '../pandas_eda_tests')
+
+        pytest.main(['-s', tests_dir])
